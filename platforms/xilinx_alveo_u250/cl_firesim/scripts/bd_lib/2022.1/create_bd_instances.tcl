@@ -92,6 +92,22 @@ set_property -dict [list \
    CONFIG.xdma_axi_intf_mm {AXI_Memory_Mapped} \
 ] $xdma_0
 
+
+proc create_axi_dwidth_converter_xdma { name } {
+   set axi_dwidth_props_xdma [list \
+      CONFIG.MI_DATA_WIDTH.VALUE_SRC USER \
+      CONFIG.ACLK_ASYNC {1} \
+      CONFIG.FIFO_MODE {2} \
+      CONFIG.MI_DATA_WIDTH {64} \
+      CONFIG.SI_DATA_WIDTH {512} \
+      CONFIG.SI_ID_WIDTH {4} \
+   ]
+   set i [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 $name ]
+   set_property -dict $axi_dwidth_props_xdma $i
+   return $i
+}
+set axi_dwidth_converter_xdma [ create_axi_dwidth_converter_xdma axi_dwidth_converter_xdma ]
+
 set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
 set_property -dict [ list \
    CONFIG.CONST_VAL {0} \

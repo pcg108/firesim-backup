@@ -28,7 +28,7 @@ set_property -dict [ list \
 set PCIE_M_AXI [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 PCIE_M_AXI ]
 set_property -dict [ list \
    CONFIG.FREQ_HZ $firesim_freq_hz \
-   CONFIG.DATA_WIDTH 512 \
+   CONFIG.DATA_WIDTH 64 
 ] $PCIE_M_AXI
 set PCIE_M_AXI_LITE [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 PCIE_M_AXI_LITE ]
 set_property -dict [ list \

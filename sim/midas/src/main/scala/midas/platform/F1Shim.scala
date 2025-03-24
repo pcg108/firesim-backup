@@ -6,7 +6,7 @@ import chisel3.util._
 
 import org.chipsalliance.cde.config.{Field, Parameters}
 import freechips.rocketchip.diplomacy.LazyModuleImp
-import freechips.rocketchip.amba.axi4.AXI4Bundle
+import freechips.rocketchip.amba.axi4.{AXI4Bundle, AXI4BundleParameters}
 
 import junctions._
 import midas.core.{CPUManagedAXI4Key, FPGAManagedAXI4Key, HostMemChannelKey, HostMemNumChannels}
@@ -41,8 +41,19 @@ class F1Shim(implicit p: Parameters) extends PlatformShim {
       }
     }
 
+    println(s"CPUManagedAXI4Key: ${p(CPUManagedAXI4Key).get.axi4BundleParams}")
+
+    println(s"HostMemNumChannels: ${p(HostMemNumChannels)}")
+
+    println(s"HostMemChannelKey: ${p(HostMemChannelKey).axi4BundleParams}")
+    
+
     val io_master = IO(Flipped(new NastiIO(p(CtrlNastiKey))))
-    val io_pcis   = IO(Flipped(new NastiIO(CreateNastiParameters(p(CPUManagedAXI4Key).get.axi4BundleParams))))
+
+    // val io_pcis   = IO(Flipped(new NastiIO(CreateNastiParameters(p(CPUManagedAXI4Key).get.axi4BundleParams))))
+    val params = AXI4BundleParameters(addrBits = 34, dataBits = 64, idBits = 1)
+    val io_pcis   = IO(Flipped(new NastiIO(CreateNastiParameters(params))))
+
     val io_slave  = IO(Vec(p(HostMemNumChannels), AXI4Bundle(p(HostMemChannelKey).axi4BundleParams)))
 
     if (p(AXIDebugPrint)) {
@@ -54,18 +65,24 @@ class F1Shim(implicit p: Parameters) extends PlatformShim {
     top.module.ctrl <> io_master
 
     // Connect the CPU-managed stream engine if the target has one. Otherwise, cap off the connection. (PCIS)
-    top.module.cpu_managed_axi4 match {
-      case None       =>
-        io_pcis.aw.ready := false.B
-        io_pcis.ar.ready := false.B
-        io_pcis.w.ready  := false.B
-        io_pcis.r.valid  := false.B
-        io_pcis.r.bits   := DontCare
-        io_pcis.b.valid  := false.B
-        io_pcis.b.bits   := DontCare
-      case Some(axi4) =>
-        AXI4NastiAssigner.toAXI4Slave(axi4, io_pcis)
-    }
+    
+    // top.module.cpu_managed_axi4 match {
+    //   case None       =>
+    //     io_pcis.aw.ready := false.B
+    //     io_pcis.ar.ready := false.B
+    //     io_pcis.w.ready  := false.B
+    //     io_pcis.r.valid  := false.B
+    //     io_pcis.r.bits   := DontCare
+    //     io_pcis.b.valid  := false.B
+    //     io_pcis.b.bits   := DontCare
+    //   case Some(axi4) =>
+    //     AXI4NastiAssigner.toAXI4Slave(axi4, io_pcis)      // axi4 is the slave from the cpu_stream_engine, io_pcis is the master (from XDMA)
+    // }
+    
+
+    // drive the AXI4 Master bundle in FPGATop 
+    AXI4NastiAssigner.toAXI4Slave(top.module.xdma, io_pcis)
+
 
     if (p(F1ShimHasPCIMPorts)) {
       val io_pcim = IO(new NastiIO(CreateNastiParameters(p(FPGAManagedAXI4Key).get.axi4BundleParams)))

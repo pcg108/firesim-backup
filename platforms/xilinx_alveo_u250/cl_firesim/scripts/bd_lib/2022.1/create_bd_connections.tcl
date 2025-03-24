@@ -14,8 +14,13 @@ connect_bd_intf_net -intf_net default_300mhz_clk0_net [get_bd_intf_ports default
 
 connect_bd_intf_net -intf_net M_AXI_DDR0_net [get_bd_intf_pins axi_dwidth_converter_0/S_AXI] [get_bd_intf_ports DDR4_0_S_AXI]
 
-connect_bd_intf_net -intf_net axi_clock_converter_0_M_AXI_net [get_bd_intf_pins axi_clock_converter_0/M_AXI] [get_bd_intf_ports PCIE_M_AXI]
+
+connect_bd_intf_net -intf_net axi_dwidth_converter_xdma_M_AXI_net [get_bd_intf_pins axi_dwidth_converter_xdma/M_AXI] [get_bd_intf_ports PCIE_M_AXI]
+connect_bd_intf_net -intf_net axi_clock_converter_0_M_AXI_net [get_bd_intf_pins axi_clock_converter_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_xdma/S_AXI]
+# connect_bd_intf_net -intf_net axi_clock_converter_0_M_AXI_net [get_bd_intf_pins axi_clock_converter_0/M_AXI] [get_bd_intf_ports PCIE_M_AXI]
+
 connect_bd_intf_net -intf_net axi_clock_converter_1_M_AXI_net [get_bd_intf_pins axi_clock_converter_1/M_AXI] [get_bd_intf_ports PCIE_M_AXI_LITE]
+
 
 connect_bd_net -net proc_sys_reset_0_interconnect_aresetn \
    [get_bd_ports sys_reset_n] \
@@ -26,7 +31,7 @@ connect_bd_net -net proc_sys_reset_0_interconnect_aresetn \
    [get_bd_pins axis_clock_converter_1/s_axis_aresetn] \
    [get_bd_pins axis_clock_converter_2/m_axis_aresetn] \
    [get_bd_pins axis_clock_converter_3/s_axis_aresetn] \
-   [get_bd_pins proc_sys_reset_0/interconnect_aresetn]
+   [get_bd_pins proc_sys_reset_0/interconnect_aresetn] [get_bd_pins axi_dwidth_converter_xdma/s_axi_aresetn] [get_bd_pins axi_dwidth_converter_xdma/m_axi_aresetn]
 
 connect_bd_net -net sys_clk_net \
    [get_bd_ports sys_clk] \
@@ -38,7 +43,8 @@ connect_bd_net -net sys_clk_net \
    [get_bd_pins axis_clock_converter_2/m_axis_aclk] \
    [get_bd_pins axis_clock_converter_3/s_axis_aclk] \
    [get_bd_pins clk_wiz_0/clk_out1] \
-   [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
+   [get_bd_pins proc_sys_reset_0/slowest_sync_clk] [get_bd_pins axi_dwidth_converter_xdma/s_axi_aclk] [get_bd_pins axi_dwidth_converter_xdma/m_axi_aclk]
+   
 
 connect_bd_intf_net -intf_net aurora_64b66b_0_USER_DATA_M_AXIS_RX [get_bd_intf_pins aurora_64b66b_0/USER_DATA_M_AXIS_RX] [get_bd_intf_pins axis_data_fifo_0/S_AXIS]
 connect_bd_intf_net -intf_net aurora_64b66b_1_USER_DATA_M_AXIS_RX [get_bd_intf_pins aurora_64b66b_1/USER_DATA_M_AXIS_RX] [get_bd_intf_pins axis_data_fifo_2/S_AXIS]
@@ -90,6 +96,7 @@ connect_bd_net -net util_ds_buf_IBUF_OUT [get_bd_pins util_ds_buf/IBUF_OUT] [get
 connect_bd_net -net xdma_0_axi_aclk [get_bd_pins axi_clock_converter_0/s_axi_aclk] [get_bd_pins axi_clock_converter_1/s_axi_aclk] [get_bd_pins xdma_0/axi_aclk]
 
 connect_bd_net -net xdma_0_axi_aresetn [get_bd_pins axi_clock_converter_0/s_axi_aresetn] [get_bd_pins axi_clock_converter_1/s_axi_aresetn] [get_bd_pins xdma_0/axi_aresetn]
+
 
 connect_bd_net -net xlconstant_0_dout [get_bd_pins xdma_0/usr_irq_req] [get_bd_pins xlconstant_0/dout]
 

@@ -184,13 +184,23 @@ class FPGATop(implicit p: Parameters) extends LazyModule with HasWidgets {
   val dramChannelsRequired = (totalDRAMAllocated + dramBytesPerChannel - 1) / dramBytesPerChannel
 
   // If the target needs DRAM, build the required channels.
-  val (targetMemoryRegions, memAXI4Nodes): (Map[String, BigInt], Seq[AXI4SlaveNode]) =
-    if (dramChannelsRequired == 0) { (Map(), Seq()) }
+  val (targetMemoryRegions, memAXI4Nodes, xdmaAXI4master): (Map[String, BigInt], Seq[AXI4SlaveNode], Seq[AXI4MasterNode]) =
+    if (dramChannelsRequired == 0) { (Map(), Seq(), Seq()) }
     else {
       // In keeping with the Nasti implementation, we put all channels on a single XBar.
       val xbar = AXI4Xbar()
 
       val memChannelParams = p(HostMemChannelKey)
+
+      // adding an AXI4 master to connect to io_pcis in F1Shim
+      val xdmaAXI4master = AXI4MasterNode(
+                            Seq(AXI4MasterPortParameters(masters = Seq(AXI4MasterParameters(name = "xdma-graphics", 
+                                                                                            id = IdRange(0, 1), // 16
+                                                                                            aligned = true,
+                                                                                            maxFlight = Some(8)
+                                                                                            ))))
+                          )
+      xbar := AXI4Buffer() := xdmaAXI4master
 
       // Define multiple single-channel nodes, instead of one multichannel node to more easily
       // bind a subset to the XBAR.
@@ -245,6 +255,12 @@ class FPGATop(implicit p: Parameters) extends LazyModule with HasWidgets {
             val regionName         = bridgeSeq.head.memoryRegionName
             val virtualBaseAddr    = addresses.map(_.base).min
             val offset             = hostBaseAddr - virtualBaseAddr
+
+            println(s"regionName: ${regionName}")
+            println(s"virtualBaseAddr: ${virtualBaseAddr}")
+            println(s"hostBaseAddr: ${hostBaseAddr}")
+            println(s"offset: ${offset}")
+
             val preTranslationPort = (xbar
               :=* AXI4Buffer()
               :=* AXI4AddressTranslation(offset, addresses, regionName))
@@ -256,7 +272,7 @@ class FPGATop(implicit p: Parameters) extends LazyModule with HasWidgets {
           }): _*
       )
 
-      (memoryRegions, memAXI4Nodes)
+      (memoryRegions, memAXI4Nodes, Seq(xdmaAXI4master)) // xdmaAXI4master
     }
 
   def printHostDRAMSummary(): Unit = {
@@ -509,6 +525,11 @@ class FPGATopImp(outer: FPGATop)(implicit p: Parameters) extends LazyModuleImp(o
   val ctrl = IO(Flipped(WidgetMMIO()))
   val mem  = IO(Vec(outer.memAXI4Nodes.length, AXI4Bundle(p(HostMemChannelKey).axi4BundleParams)))
 
+  val xdma_params = AXI4BundleParameters(addrBits = 34, dataBits = 64, idBits = 1)
+  val xdma  = IO(Flipped(AXI4Bundle(xdma_params)))
+  outer.xdmaAXI4master(0).out.head._1 <> xdma
+
+
   val qsfpBitWidth = p(FPGATopQSFPBitWidth)
   val qsfp         = IO(Vec(outer.qsfpCnt, QSFPBundle(qsfpBitWidth)))
 
@@ -529,6 +550,7 @@ class FPGATopImp(outer: FPGATop)(implicit p: Parameters) extends LazyModuleImp(o
   dontTouch(ctrl)
   dontTouch(mem)
   dontTouch(qsfp)
+  dontTouch(xdma)
   cpu_managed_axi4.foreach(dontTouch(_))
   fpga_managed_axi4.foreach(dontTouch(_))
 

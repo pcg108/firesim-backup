@@ -26,12 +26,12 @@ module overall_fpga_top(
     `define AMBA_AXI4
     `define AMBA_AXI_CACHE
     `define AMBA_AXI_PROT
-    `define AMBA_AXI_ID
-    `AMBA_AXI_WIRE(PCIE_M_AXI, 4, 64, 512)
+    //`define AMBA_AXI_ID
+    `AMBA_AXI_WIRE(PCIE_M_AXI, 4, 34, 64)
     `undef AMBA_AXI4
     `undef AMBA_AXI_CACHE
     `undef AMBA_AXI_PROT
-    `undef AMBA_AXI_ID
+    //`undef AMBA_AXI_ID
 
     `define AMBA_AXI_PROT
     `AMBA_AXI_WIRE(PCIE_M_AXI_LITE, unused, 32, 32)
@@ -79,12 +79,12 @@ module overall_fpga_top(
 	`define AMBA_AXI4
 	`define AMBA_AXI_CACHE
 	`define AMBA_AXI_PROT
-	`define AMBA_AXI_ID
+	// `define AMBA_AXI_ID
 	`AMBA_AXI_PORT_CONNECTION(PCIE_M_AXI, PCIE_M_AXI)
 	`undef AMBA_AXI4
 	`undef AMBA_AXI_CACHE
 	`undef AMBA_AXI_PROT
-	`undef AMBA_AXI_ID
+	// `undef AMBA_AXI_ID
 
 	`define AMBA_AXI_PROT
 	`AMBA_AXI_PORT_CONNECTION(PCIE_M_AXI_LITE, PCIE_M_AXI_LITE)
@@ -182,7 +182,7 @@ module overall_fpga_top(
         .io_pcis_aw_bits_prot(3'h0), //unused? (could connect?) PCIE_M_AXI_awprot
         .io_pcis_aw_bits_qos(4'h0), // PCIE_M_AXI_awqos
         .io_pcis_aw_bits_region(4'h0), // PCIE_M_AXI_awregion
-        .io_pcis_aw_bits_id(PCIE_M_AXI_awid),
+        .io_pcis_aw_bits_id(1'h0), // PCIE_M_AXI_awid
         .io_pcis_aw_bits_user(1'h0),
 
         .io_pcis_w_ready(PCIE_M_AXI_wready),
@@ -196,7 +196,7 @@ module overall_fpga_top(
         .io_pcis_b_ready(PCIE_M_AXI_bready),
         .io_pcis_b_valid(PCIE_M_AXI_bvalid),
         .io_pcis_b_bits_resp(PCIE_M_AXI_bresp),
-        .io_pcis_b_bits_id(PCIE_M_AXI_bid),
+        .io_pcis_b_bits_id(1'h0), // PCIE_M_AXI_bid
         .io_pcis_b_bits_user(),    // UNUSED at top level
 
         .io_pcis_ar_ready(PCIE_M_AXI_arready),
@@ -210,7 +210,7 @@ module overall_fpga_top(
         .io_pcis_ar_bits_prot(3'h0), // PCIE_M_AXI_arprot
         .io_pcis_ar_bits_qos(4'h0), // PCIE_M_AXI_arqos
         .io_pcis_ar_bits_region(4'h0), // PCIE_M_AXI_arregion
-        .io_pcis_ar_bits_id(PCIE_M_AXI_arid),
+        .io_pcis_ar_bits_id(1'h0), // PCIE_M_AXI_arid
         .io_pcis_ar_bits_user(1'h0),
 
         .io_pcis_r_ready(PCIE_M_AXI_rready),
@@ -218,7 +218,7 @@ module overall_fpga_top(
         .io_pcis_r_bits_resp(PCIE_M_AXI_rresp),
         .io_pcis_r_bits_data(PCIE_M_AXI_rdata),
         .io_pcis_r_bits_last(PCIE_M_AXI_rlast),
-        .io_pcis_r_bits_id(PCIE_M_AXI_rid),
+        .io_pcis_r_bits_id(1'h0), // PCIE_M_AXI_rid
         .io_pcis_r_bits_user(),    // UNUSED at top level
 
         // `include "firesim_ila_insert_ports.v"
