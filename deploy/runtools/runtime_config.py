@@ -362,6 +362,7 @@ class RuntimeHWConfig:
     def get_deploymakefrag_for_config(self) -> Optional[str]:
         if self.deploy_makefrag:
             base = self.hwdb_file
+            self.deploy_makefrag = os.getcwd() + '/../../../generators/firechip/chip/src/main/makefrag/firesim'
             abs_deploy_makefrag = resolve_path(self.deploy_makefrag, base)
             if abs_deploy_makefrag is None:
                 raise Exception(
