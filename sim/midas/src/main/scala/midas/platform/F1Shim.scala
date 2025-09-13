@@ -78,6 +78,10 @@ class F1Shim(implicit p: Parameters) extends PlatformShim {
     //   case Some(axi4) =>
     //     AXI4NastiAssigner.toAXI4Slave(axi4, io_pcis)      // axi4 is the slave from the cpu_stream_engine, io_pcis is the master (from XDMA)
     // }
+    top.module.cpu_managed_axi4 match {
+      case Some(axi4) => axi4 := DontCare
+      case None       => // do nothing
+    }
     
 
     // drive the AXI4 Master bundle in FPGATop 
